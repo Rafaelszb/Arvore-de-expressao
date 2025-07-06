@@ -1,12 +1,17 @@
 #include "biblioteca.h"
 
 int main() {
-    Node *root = new Node();
-    montar_string("((10*3)+(40/(-2)))*2", root);
+    Node *raiz = new Node();
+    string expressao = "((-53+1)*1)/2";
 
-    // + + 5 5 + 5 5
-    printPreOrder(root);
-cout << "Resultado: " << executar_arvore(root) << endl; // 19.8
+    montar_string(expressao, raiz);
+
+    cout << "Árvore:\n";
+    
+    print(raiz);
+
+    cout << "\n\nResultado: " << executar_arvore(raiz) << endl;
+
 
     return 0;
 }

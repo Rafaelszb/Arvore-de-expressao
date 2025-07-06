@@ -1,10 +1,7 @@
 #ifndef BIBLIOTECA_H
 #define BIBLIOTECA_H
-
 #include <iostream>
 #include <vector>
-
-
 using namespace std;
 
 enum TipoNode {
@@ -58,7 +55,7 @@ string removerParentesesExternos(const string& expressao) {
 
 void montar_string(const string& expressao, Node*& node) {
     string expr = removerParentesesExternos(expressao);
-    cout << expr << endl;
+    //cout << expr << endl;
     if (expr.empty()) return;
 
     int pos = encontrarOperadorPrincipal(expr);
@@ -89,7 +86,9 @@ void printPreOrder(Node* node) {
 }
 
 bool isNumero(const string& s) {
-    if (s.empty()) return false;
+    if (s.empty()) {
+        return false;
+    }
 
     bool temPonto = false;
     bool temDigito = false;
@@ -104,7 +103,9 @@ bool isNumero(const string& s) {
         if (c >= '0' && c <= '9') {
             temDigito = true;
         } else if (c == '.') {
-            if (temPonto) return false;
+            if (temPonto) {
+                return false;
+            }
             temPonto = true;
         } else {
             return false;
@@ -115,13 +116,15 @@ bool isNumero(const string& s) {
 }
 
 double executar_arvore(Node* node) {
-    if (node == NULL) return 0;
+    if (node == NULL) {
+        return 0;
+    }
 
     if (node->tipo == OPERANDO) {
         if (isNumero(node->key)) {
             return stod(node->key); // converte string para double
         } else {
-            return 0;
+             throw runtime_error("Expressão inserida está errada");
         }
     }
 
@@ -136,6 +139,27 @@ double executar_arvore(Node* node) {
     return 0;
 }
 
+void print(Node* node, int espaco = 0) {
+    if (node == nullptr) {
+        return;
+    }
+    int nivel = 4;
+    espaco += nivel;
 
+    print(node->right, espaco);
 
+    cout << endl;
+    for (int i = nivel; i < espaco; i++){
+        cout << " ";
+    }
+    
+    if(node->tipo == OPERADOR){
+    cout << node->key;
+}
+    else if(node->tipo == OPERANDO && isNumero(node->key)){
+    cout << node->key;
+}
+
+    print(node->left, espaco);
+}
 #endif
