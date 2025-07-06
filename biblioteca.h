@@ -2,7 +2,8 @@
 #define BIBLIOTECA_H
 
 #include <iostream>
-#include <vector>
+#include <string>
+
 
 using namespace std;
 
@@ -12,7 +13,7 @@ enum TipoNode {
 };
 
 struct Node {
-    char key;
+    string key; 
     Node* left;
     Node* right;
     TipoNode tipo;
@@ -20,10 +21,8 @@ struct Node {
 
 int encontrarOperadorPrincipal(const string& expressao) {
     int nivelParenteses = 0;
-
     for (int i = expressao.length() - 1; i >= 0; i--) {
         char c = expressao[i];
-
         if (c == ')') nivelParenteses++;
         else if (c == '(') nivelParenteses--;
         else if (nivelParenteses == 0 && (c == '+' || c == '-')) {
@@ -33,14 +32,12 @@ int encontrarOperadorPrincipal(const string& expressao) {
     nivelParenteses = 0;
     for (int i = expressao.length() - 1; i >= 0; i--) {
         char c = expressao[i];
-
         if (c == ')') nivelParenteses++;
         else if (c == '(') nivelParenteses--;
         else if (nivelParenteses == 0 && (c == '*' || c == '/')) {
             return i;
         }
     }
-
     return -1;
 }
 
@@ -48,45 +45,41 @@ string removerParentesesExternos(const string& expressao) {
     if (expressao.empty()) return expressao;
     if (expressao.front() == '(' && expressao.back() == ')') {
         int nivelParenteses = 0;
-        for (int i = 0; i < expressao.length(); i++) {
+        for (int i = 0; i < (int)expressao.length(); i++) {
             if (expressao[i] == '(') nivelParenteses++;
-            if (expressao[i] == ')') nivelParenteses--;
-
-            if (nivelParenteses == 0 && i < expressao.length() - 1)
-                return expressao; // Tem algo fora dos parênteses
+            else if (expressao[i] == ')') nivelParenteses--;
+            if (nivelParenteses == 0 && i < (int)expressao.length() - 1)
+                return expressao; 
         }
-        return expressao.substr(1, expressao.length() - 2); // Retorna a expressao sem o primeiro e o ultimo caractere "(" e ")"
+        return expressao.substr(1, expressao.length() - 2);
     }
     return expressao;
 }
 
 void montar_string(const string& expressao, Node*& node) {
     string expr = removerParentesesExternos(expressao);
-    cout<<expr<<endl;
+    cout << expr << endl;
     if (expr.empty()) return;
 
     int pos = encontrarOperadorPrincipal(expr);
-
     node = new Node();
     node->left = nullptr;
     node->right = nullptr;
 
     if (pos != -1) {
-        node->key = expr[pos]; "+";
-        node->tipo = TipoNode::OPERADOR;
+        node->key = string(1, expr[pos]);
+        node->tipo = OPERADOR;
 
         string esquerda = expr.substr(0, pos);
-        string direita = expr.substr(pos + 1);
+        string direita  = expr.substr(pos + 1);
 
-        montar_string(esquerda, node->left);
-        montar_string(direita, node->right);
-    }
-    else {
-        node->tipo = TipoNode::OPERANDO;
-        node->key = expr[0];
+        montar_string(esquerda,  node->left);
+        montar_string(direita,   node->right);
+    } else {
+        node->tipo = OPERANDO;
+        node->key = expr;  
     }
 }
-
 
 void printPreOrder(Node* node) {
     if (!node) return;
@@ -94,6 +87,55 @@ void printPreOrder(Node* node) {
     printPreOrder(node->left);
     printPreOrder(node->right);
 }
+
+bool isNumero(const string& s) {
+    if (s.empty()) return false;
+
+    bool temPonto = false;
+    bool temDigito = false;
+    int sinal = 0;
+
+    if (s[0] == '-' || s[0] == '+') {
+        sinal = 1;
+    }
+
+    for (int i = sinal; i < s.length(); i++) {
+        char c = s[i];
+        if (c >= '0' && c <= '9') {
+            temDigito = true;
+        } else if (c == '.') {
+            if (temPonto) return false;
+            temPonto = true;
+        } else {
+            return false;
+        }
+    }
+
+    return temDigito;
+}
+
+double executar_arvore(Node* node) {
+    if (node == NULL) return 0;
+
+    if (node->tipo == OPERANDO) {
+        if (isNumero(node->key)) {
+            return stod(node->key); // converte string para double
+        } else {
+            return 0;
+        }
+    }
+
+    double a = executar_arvore(node->left);
+    double b = executar_arvore(node->right);
+
+    if (node->key == "+") return a + b;
+    if (node->key == "-") return a - b;
+    if (node->key == "*") return a * b;
+    if (node->key == "/") return b != 0 ? a / b : 0;
+
+    return 0;
+}
+
 
 
 #endif
